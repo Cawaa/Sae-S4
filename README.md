@@ -7,8 +7,8 @@ Optimise les trajets en intégrant les services de la ville (composteurs, points
 
 ```
 nantes-urban-app/
-├── backend/        # Serveur Node.js (API REST + algorithmes)
-├── mobile/         # Application Android
+├── Microservices/        # Serveur Node.js (API REST + algorithmes)
 ├── database/       # Schémas et migrations BDD
 └── docs/           # Documentation technique
 ```
+
