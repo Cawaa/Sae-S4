@@ -1,39 +1,33 @@
 # Nantes App
 
-Application mobile de navigation urbaine intelligente pour la ville de Nantes.
-Optimise les trajets en intégrant les services de la ville (composteurs, points de collecte, toilettes publiques, parkings…).
+Application de navigation urbaine pour Nantes.
+Le projet s'appuie sur des microservices (OpenData, gestion de donnees, service principal).
 
-## Structure du projet
+## Structure actuelle
 
 ```
-nantes-urban-app/
-├── Microservices/        # Serveur Node.js (API REST + algorithmes)
-├── database/       # Schémas et migrations BDD
-└── docs/           # Documentation technique
+.
+├── README.md
+└── microservices/
+    ├── fetcher-opendata/   # API Express (toilettes, parkings, composteurs)
+    ├── data-manager/       # A completer (stocker les données recup par les fetchers)
+    └── main/               # A completer (permet de répondre a une requette client avec les données recupérés)
 ```
 
-## Comment récupérer le projet et travailler dessus 
+## Lancer le microservice OpenData
 
-### Tout d'abord cloner le projet si cela n'est pas déjà fait
-
-1. **Récupérer la mise à jour :**
+1. Se placer dans le dossier du service :
    ```bash
-   git pull
+   cd microservices/fetcher-opendata
    ```
-
-2. **Aller dans le bon dossier :** *(par exemple le microservice fetcher-opendata)*
-   ```bash
-   cd Microservices/fetcher-opendata
-   ```
-
-3. **Installer les dépendances :**
+2. Installer les dependances :
    ```bash
    npm install
    ```
- 
-
-4. **Lancer le serveur :**
+3. Demarrer en mode developpement :
    ```bash
    npm run dev
    ```
+
+Le service demarre sur `http://localhost:3001` avec des routes sous `/api`.
 
