@@ -1,33 +1,138 @@
 # Nantes App
 
-Application de navigation urbaine pour Nantes.
-Le projet s'appuie sur des microservices (OpenData, gestion de donnees, service principal).
+Application de navigation urbaine pour Nantes basee sur une architecture microservices.
 
-## Structure actuelle
+## Etat actuel du projet
+
+Deux microservices sont implementes et communiquent entre eux:
+
+- `fetcher-opendata` : recupere les donnees OpenData de Nantes
+- `data-manager` : stocke les donnees en base MongoDB en memoire
+
+Le dossier `microservices/main` est present mais vide pour le moment.
+
+## Architecture
+
+Flux actuel:
+
+1. Le client appelle le service `fetcher-opendata`.
+2. Le fetcher va chercher les jeux de donnees sur l'API OpenData de Nantes.
+3. Le fetcher envoie ensuite les donnees au `data-manager` via HTTP.
+4. Le `data-manager` remplace les anciennes donnees du type concerne en base memoire.
+
+## Structure
 
 ```
 .
 ├── README.md
 └── microservices/
-    ├── fetcher-opendata/   # API Express (toilettes, parkings, composteurs)
-    ├── data-manager/       # A completer (stocker les données recup par les fetchers)
-    └── main/               # A completer (permet de répondre a une requette client avec les données recupérés)
+      ├── fetcher-opendata/
+      │   ├── service.js
+      │   ├── controllers/
+      │   ├── dao/
+      │   └── routes/
+      ├── data-manager/
+      │   ├── serveur.mjs
+      │   ├── app.mjs
+      │   └── api/
+      │       ├── controlleur/
+      │       ├── dao/
+      │       ├── model/
+      │       └── route/
+      └── main/ (vide)
 ```
 
-## Lancer le microservice OpenData
+## Prerequis
 
-1. Se placer dans le dossier du service :
-   ```bash
-   cd microservices/fetcher-opendata
-   ```
-2. Installer les dependances :
-   ```bash
-   npm install
-   ```
-3. Demarrer en mode developpement :
-   ```bash
-   npm run dev
-   ```
+- Node.js 18+
+- npm
 
-Le service demarre sur `http://localhost:3001` avec des routes sous `/api`.
+Note Windows PowerShell: si une politique d'execution bloque npm, utiliser `npm.cmd` a la place de `npm`.
+
+## Configuration
+
+### 1) data-manager
+
+Dans `microservices/data-manager`, creer un fichier `.env` a partir de `.env.example`:
+
+```
+PORT=3002
+```
+
+### 2) fetcher-opendata
+
+Dans `microservices/fetcher-opendata`, creer un fichier `.env` a partir de `.env.example`:
+
+```
+PORT=3001
+DATA_MANAGER_URL=http://localhost:3002
+```
+
+## Lancement des services
+
+Lancer d'abord le Data Manager, puis le Fetcher.
+
+### Terminal 1 - Data Manager
+
+```bash
+cd microservices/data-manager
+npm install
+npm run dev
+```
+
+Service disponible sur `http://localhost:3002`.
+
+### Terminal 2 - Fetcher OpenData
+
+```bash
+cd microservices/fetcher-opendata
+npm install
+npm run dev
+```
+
+Service disponible sur `http://localhost:3001`.
+
+## API disponible
+
+### fetcher-opendata (`/api`)
+
+- `GET /api/toilettes`
+- `GET /api/parkings`
+- `GET /api/composteurs`
+
+Chaque route:
+
+1. recupere les donnees depuis l'OpenData Nantes,
+2. envoie ces donnees au Data Manager sur `POST /api/db/poi`,
+3. retourne un message de succes avec le nombre d'elements traites.
+
+### data-manager (`/api/db`)
+
+- `POST /api/db/poi`
+   - body attendu:
+
+      ```json
+      {
+         "type": "toilettes",
+         "data": [{ "...": "..." }]
+      }
+      ```
+
+- `GET /api/db/poi`
+   - retourne toutes les donnees stockees
+
+- `GET /api/db/poi?type=toilettes`
+   - retourne seulement les donnees d'un type
+
+## Jeux de donnees OpenData integres
+
+- Toilettes publiques
+- Parkings publics (disponibilites)
+- Composteurs de quartier
+
+## Limites actuelles
+
+- Base de donnees en memoire: les donnees sont perdues a chaque redemarrage du `data-manager`.
+- Pas encore de service principal/aggregateur dans `microservices/main`.
+- Pas de suite de tests automatisee declaree dans les scripts npm.
 
