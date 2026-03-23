@@ -92,6 +92,13 @@ npm run dev
 
 Service disponible sur `http://localhost:3001`.
 
+## Exemple d'utilisation de data manager 
+
+Démarrer Data Manager (3002).
+Démarrer Fetcher (3001).
+Appeler http://localhost:3001/api/toilettes.
+Puis appeler http://localhost:3002/api/db/poi?type=toilettes. 
+
 ## API disponible
 
 ### fetcher-opendata (`/api`)
