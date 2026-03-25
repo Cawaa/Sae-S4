@@ -52,7 +52,6 @@ Le microservice `fetcher-opendata` appelle les datasets OpenData Nantes et envoi
 
 ### 2. Lecture des données
 Le microservice `main` interroge le `data-manager` avec :
-
 - `GET /api/db/poi`
 - `GET /api/db/poi?type=...`
 
@@ -342,15 +341,14 @@ Attention : cette commande doit être lancée depuis `microservices/main`.
 
 ## Modifications apportées au reste du projet pour le proxy
 
-Pour permettre au projet de fonctionner aussi bien :
+Pour permettre au projet de fonctionner :
 - sur les machines de l’IUT avec proxy ;
-- que sur une machine personnelle sans proxy ;
+- sur une machine personnelle sans proxy ;
 
 des modifications légères ont été faites côté `fetcher-opendata`.
 
 ### 1. Proxy rendu optionnel pour l’accès OpenData
 Le fetcher lit automatiquement les variables d’environnement suivantes si elles existent :
-
 - `https_proxy`
 - `HTTPS_PROXY`
 - `http_proxy`
@@ -360,7 +358,7 @@ Si aucune n’est définie, la connexion se fait directement.
 
 Cela permet :
 - de fonctionner à l’IUT avec proxy ;
-- de fonctionner à la maison sans rien changer au code.
+- de fonctionner chez soi sans rien changer au code.
 
 ### 2. Appels locaux sans proxy
 Les appels entre microservices vers `localhost` ne passent jamais par un proxy.
@@ -369,16 +367,61 @@ Concrètement :
 - `fetcher-opendata -> data-manager`
 - `main -> data-manager`
 
-utilisent `proxy: false` côté Axios.
-
-Cela évite qu’un proxy institutionnel interfère avec les communications locales.
+utilisent `proxy: false` côté Axios pour les appels locaux.
 
 ### 3. Pas de proxy codé en dur
 L’adresse du proxy n’est pas écrite en dur dans le dépôt.
 
 Le comportement dépend uniquement de l’environnement d’exécution de la machine.
 
-### 4. Intérêt de cette approche
+### 4. Dépendances du fetcher
+Le microservice `fetcher-opendata` utilise :
+- `node-fetch@2`
+- `https-proxy-agent@5`
+
+pour gérer les appels OpenData avec ou sans proxy.
+
+Si ces dépendances sont bien présentes dans `package.json` et `package-lock.json`, un simple :
+
+```bash
+cd microservices/fetcher-opendata
+npm install
+```
+
+suffit sur n’importe quelle machine.
+
+Si ce n’est pas encore le cas, il faut d’abord exécuter une fois :
+
+```bash
+npm install node-fetch@2 https-proxy-agent@5
+```
+
+puis commit les fichiers :
+- `package.json`
+- `package-lock.json`
+
+### 5. Point d’attention à l’IUT
+À l’IUT, il peut arriver que le proxy institutionnel réponde `502` lorsque le fetcher tente d’interroger l’OpenData Nantes.
+
+Dans ce cas :
+- le fetcher démarre bien ;
+- le proxy est bien détecté ;
+- mais l’appel sortant échoue avant l’enregistrement dans `data-manager`.
+
+Ce problème ne vient pas du microservice `main`.
+
+Pour vérifier l’accès réseau, on peut tester directement dans le shell :
+
+```bash
+curl -I "https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_toilettes-publiques-nantes-metropole/records?limit=1"
+```
+
+Si ce test répond `200`, alors le réseau et le proxy laissent bien passer la requête, et le problème vient de la manière dont le fetcher effectue l’appel HTTP. Dans ce cas, il faut utiliser la même méthode que celle vue en architecture logicielle :
+- `node-fetch`
+- `https-proxy-agent`
+- `process.env.https_proxy`
+
+### 6. Intérêt de cette approche
 Cette solution rend le projet plus portable :
 - Linux à l’IUT
 - Windows personnel

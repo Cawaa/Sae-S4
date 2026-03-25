@@ -1,58 +1,32 @@
-const axios = require('axios');
+const fetch = require('node-fetch');
+const { HttpsProxyAgent } = require('https-proxy-agent');
 
-function getAxiosProxyConfig() {
-  const proxyUrl =
-    process.env.https_proxy ||
-    process.env.HTTPS_PROXY ||
-    process.env.http_proxy ||
-    process.env.HTTP_PROXY;
+function buildFetchOptions() {
+  const proxy = process.env.https_proxy || process.env.HTTPS_PROXY;
 
-  if (!proxyUrl) {
-    console.log('[Fetcher][Proxy] Aucun proxy détecté, connexion directe.');
+  if (proxy) {
+    console.log(`[Fetcher][Proxy] Proxy détecté : ${proxy}`);
     return {
-      timeout: 10000
+      agent: new HttpsProxyAgent(proxy)
     };
   }
 
-  try {
-    const parsed = new URL(proxyUrl);
-
-    const config = {
-      timeout: 10000,
-      proxy: {
-        protocol: parsed.protocol.replace(':', ''),
-        host: parsed.hostname,
-        port: parsed.port
-          ? Number(parsed.port)
-          : parsed.protocol === 'https:'
-            ? 443
-            : 80
-      }
-    };
-
-    if (parsed.username || parsed.password) {
-      config.proxy.auth = {
-        username: decodeURIComponent(parsed.username),
-        password: decodeURIComponent(parsed.password)
-      };
-    }
-
-    console.log(`[Fetcher][Proxy] Proxy détecté : ${proxyUrl}`);
-    return config;
-  } catch (error) {
-    console.warn('[Fetcher][Proxy] URL de proxy invalide, connexion directe.');
-    return {
-      timeout: 10000
-    };
-  }
+  console.log('[Fetcher][Proxy] Aucun proxy détecté, connexion directe.');
+  return {};
 }
 
 async function fetchFromNantesAPI(datasetId, limit = 20) {
   const baseUrl = 'https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets';
   const url = `${baseUrl}/${datasetId}/records?limit=${limit}`;
 
-  const response = await axios.get(url, getAxiosProxyConfig());
-  return response.data;
+  const response = await fetch(url, buildFetchOptions());
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Erreur API Nantes: ${response.status} - ${body}`);
+  }
+
+  return response.json();
 }
 
 const openDataDAO = {
