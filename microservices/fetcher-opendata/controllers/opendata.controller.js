@@ -1,8 +1,13 @@
 const axios = require('axios');
 const openDataDAO = require('../dao/opendata.dao');
 
-// Récupérer l'URL du Data Manager depuis le .env
 const DATA_MANAGER_URL = process.env.DATA_MANAGER_URL || 'http://localhost:3002';
+
+const dataManagerHttp = axios.create({
+  baseURL: DATA_MANAGER_URL,
+  timeout: 5000,
+  proxy: false
+});
 
 const openDataController = {
     getToilettes: async (req, res) => {
@@ -15,7 +20,7 @@ const openDataController = {
 
             // 2. ENVOI DES DONNÉES AU DATA MANAGER
             console.log('[Fetcher] Envoi des données au Data Manager...');
-            await axios.post(`${DATA_MANAGER_URL}/api/db/poi`, {
+            await dataManagerHttp.post('/api/db/poi', {
                 type: 'toilettes',
                 data: Array.isArray(toilettesData) ? toilettesData : [toilettesData]
             });
@@ -38,7 +43,7 @@ const openDataController = {
             const parkingsData = data.results || data;
 
             console.log('[Fetcher] Envoi des données au Data Manager...');
-            await axios.post(`${DATA_MANAGER_URL}/api/db/poi`, {
+            await dataManagerHttp.post('/api/db/poi', {
                 type: 'parkings',
                 data: Array.isArray(parkingsData) ? parkingsData : [parkingsData]
             });
@@ -61,7 +66,7 @@ const openDataController = {
             const composteurData = data.results || data;
 
             console.log('[Fetcher] Envoi des données au Data Manager...');
-            await axios.post(`${DATA_MANAGER_URL}/api/db/poi`, {
+            await dataManagerHttp.post('/api/db/poi', {
                 type: 'composteurs',
                 data: Array.isArray(composteurData) ? composteurData : [composteurData]
             });
