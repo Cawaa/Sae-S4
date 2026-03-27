@@ -1,11 +1,19 @@
 import mongoose from 'mongoose';
 
-const poiSchema = new mongoose.Schema({
-    type: { type: String, required: true, index: true }, // ex: 'toilettes', 'parkings', 'composteurs'
-    data: { type: mongoose.Schema.Types.Mixed, required: true }, // Les données brutes (JSON)
-    lastUpdate: { type: Date, default: Date.now }
-});
+const poiCacheSchema = new mongoose.Schema(
+  {
+    type: { type: String, required: true, unique: true, index: true },
+    items: { type: [mongoose.Schema.Types.Mixed], required: true, default: [] },
+    source: { type: String, default: 'fetcher-opendata' },
+    fetchedAt: { type: Date, required: true },
+    expiresAt: { type: Date, required: true },
+    itemCount: { type: Number, required: true, default: 0 }
+  },
+  {
+    versionKey: false
+  }
+);
 
-const POIModel = mongoose.model('POI', poiSchema);
+const POICacheModel = mongoose.model('POICache', poiCacheSchema);
 
-export default POIModel;
+export default POICacheModel;

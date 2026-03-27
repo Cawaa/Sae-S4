@@ -1,6 +1,6 @@
 {
   "name": "main-brain",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Microservice agrégateur / brain pour la SAE S4",
   "main": "service.js",
   "type": "commonjs",

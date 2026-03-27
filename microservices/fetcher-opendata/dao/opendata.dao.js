@@ -1,21 +1,28 @@
 const fetch = require('node-fetch');
 const { HttpsProxyAgent } = require('https-proxy-agent');
 
+const DEFAULT_LIMIT = Number(process.env.FETCH_LIMIT || 100);
+
+const DATASET_IDS = {
+  toilettes: '244400404_toilettes-publiques-nantes-metropole',
+  parkings: '244400404_parkings-publics-nantes-disponibilites',
+  parkingsStatic: '244400404_parkings-publics-nantes',
+  composteurs: '512042839_composteurs-quartier-nantes-metropole'
+};
+
 function buildFetchOptions() {
   const proxy = process.env.https_proxy || process.env.HTTPS_PROXY;
 
   if (proxy) {
-    console.log(`[Fetcher][Proxy] Proxy détecté : ${proxy}`);
     return {
       agent: new HttpsProxyAgent(proxy)
     };
   }
 
-  console.log('[Fetcher][Proxy] Aucun proxy détecté, connexion directe.');
   return {};
 }
 
-async function fetchFromNantesAPI(datasetId, limit = 20) {
+async function fetchFromNantesAPI(datasetId, limit = DEFAULT_LIMIT) {
   const baseUrl = 'https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets';
   const url = `${baseUrl}/${datasetId}/records?limit=${limit}`;
 
@@ -29,17 +36,34 @@ async function fetchFromNantesAPI(datasetId, limit = 20) {
   return response.json();
 }
 
+async function fetchDataset(datasetKey, limit = DEFAULT_LIMIT) {
+  const datasetId = DATASET_IDS[datasetKey];
+
+  if (!datasetId) {
+    throw new Error(`Dataset inconnu : ${datasetKey}`);
+  }
+
+  return fetchFromNantesAPI(datasetId, limit);
+}
+
 const openDataDAO = {
-  getToilettes: async () => {
-    return fetchFromNantesAPI('244400404_toilettes-publiques-nantes-metropole');
+  DATASET_IDS,
+  fetchDataset,
+
+  async getToilettes() {
+    return fetchDataset('toilettes');
   },
 
-  getParkings: async () => {
-    return fetchFromNantesAPI('244400404_parkings-publics-nantes-disponibilites');
+  async getParkings() {
+    return fetchDataset('parkings');
   },
 
-  getComposteurs: async () => {
-    return fetchFromNantesAPI('512042839_composteurs-quartier-nantes-metropole');
+  async getParkingsStatic() {
+    return fetchDataset('parkingsStatic');
+  },
+
+  async getComposteurs() {
+    return fetchDataset('composteurs');
   }
 };
 

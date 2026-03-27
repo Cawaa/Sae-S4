@@ -8,8 +8,7 @@ const router = express.Router();
  * /api/poi/available-types:
  *   get:
  *     summary: Retourne les types de POI gérés par le brain.
- *     tags:
- *       - POI
+ *     tags: [POI]
  *     responses:
  *       200:
  *         description: Liste des types disponibles.
@@ -21,46 +20,28 @@ router.get('/poi/available-types', brainController.getAvailableTypes);
  * /api/itinerary/plan:
  *   post:
  *     summary: Construit un trajet simplifié entre un départ et une arrivée avec POI intermédiaires.
- *     tags:
- *       - Itinerary
+ *     tags: [Itinerary]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - start
- *               - end
+ *             required: [start, end]
  *             properties:
  *               start:
  *                 type: object
- *                 properties:
- *                   lat:
- *                     type: number
- *                   lon:
- *                     type: number
  *               end:
  *                 type: object
- *                 properties:
- *                   lat:
- *                     type: number
- *                   lon:
- *                     type: number
  *               poiTypes:
  *                 type: array
  *                 items:
  *                   type: string
  *               maxPoi:
  *                 type: integer
- *                 minimum: 0
  *     responses:
  *       200:
- *         description: Itinéraire simplifié calculé.
- *       400:
- *         description: Requête invalide.
- *       500:
- *         description: Erreur interne.
+ *         description: Itinéraire calculé.
  */
 router.post('/itinerary/plan', brainController.planItinerary);
 
@@ -69,8 +50,7 @@ router.post('/itinerary/plan', brainController.planItinerary);
  * /api/itinerary/debug:
  *   post:
  *     summary: Retourne les données intermédiaires du brain pour le débogage.
- *     tags:
- *       - Itinerary
+ *     tags: [Itinerary]
  *     responses:
  *       200:
  *         description: Informations de debug.

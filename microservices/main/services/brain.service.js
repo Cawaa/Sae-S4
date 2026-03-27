@@ -1,15 +1,29 @@
 const dataManagerDao = require('../dao/dataManager.dao');
 const routingDao = require('../dao/routing.dao');
-const { normalizePoi } = require('../utils/normalizePoi');
 const { rankPoisBetweenPoints } = require('../utils/distance');
 
 const AVAILABLE_TYPES = ['toilettes', 'parkings', 'composteurs'];
 
-function uniqueByCoordinates(pois) {
+function normalizeRequestedTypes(poiTypes) {
+  if (!Array.isArray(poiTypes) || poiTypes.length === 0) {
+    return [];
+  }
+
+  return [...new Set(poiTypes.filter((type) => AVAILABLE_TYPES.includes(type)))];
+}
+
+function uniquePois(pois) {
   const seen = new Set();
+
   return pois.filter((poi) => {
-    const key = `${poi.type}:${poi.lat}:${poi.lon}`;
-    if (seen.has(key)) return false;
+    const key = poi.sourceId
+      ? `${poi.type}:${poi.sourceId}`
+      : `${poi.type}:${poi.lat}:${poi.lon}`;
+
+    if (seen.has(key)) {
+      return false;
+    }
+
     seen.add(key);
     return true;
   });
@@ -19,63 +33,66 @@ function createSegments(start, orderedPois, end) {
   const points = [start, ...orderedPois.map((poi) => ({ lat: poi.lat, lon: poi.lon })), end];
   const segments = [];
 
-  for (let i = 0; i < points.length - 1; i += 1) {
+  for (let index = 0; index < points.length - 1; index += 1) {
     segments.push({
-      from: points[i],
-      to: points[i + 1]
+      from: points[index],
+      to: points[index + 1]
     });
   }
 
   return segments;
 }
 
+async function fetchByType(type) {
+  const items = await dataManagerDao.getPoiByType(type);
+
+  return {
+    type,
+    items: Array.isArray(items) ? items.filter(Boolean) : []
+  };
+}
+
 const brainService = {
-  /**
-   * Retourne les types de POI officiellement gérés par le brain.
-   */
   getAvailableTypes() {
     return AVAILABLE_TYPES;
   },
 
-  /**
-   * Construit un plan d'itinéraire simple.
-   * MVP :
-   * 1. récupère les POI depuis le Data Manager ;
-   * 2. normalise les données ;
-   * 3. garde les plus proches du trajet ;
-   * 4. retourne un JSON métier propre.
-   */
   async buildPlan(payload) {
     const start = payload.start;
     const end = payload.end;
-    const poiTypes = Array.isArray(payload.poiTypes) && payload.poiTypes.length > 0
-      ? payload.poiTypes.filter((type) => AVAILABLE_TYPES.includes(type))
-      : [];
-
+    const poiTypes = normalizeRequestedTypes(payload.poiTypes);
     const maxPoi = Number.isInteger(payload.maxPoi)
       ? payload.maxPoi
       : Number(process.env.MAX_DEFAULT_POI || 3);
 
-    let normalizedPois = [];
+    const stateTrace = ['QUERY_RECEIVED', 'QUERY_VALIDATED'];
+
+    let groupedResults = [];
 
     if (poiTypes.length > 0) {
-      const groupedResults = await Promise.all(
-        poiTypes.map(async (type) => {
-          const rawPois = await dataManagerDao.getPoiByType(type);
-          return rawPois
-            .map((item) => normalizePoi(type, item))
-            .filter(Boolean);
-        })
-      );
-
-      normalizedPois = uniqueByCoordinates(groupedResults.flat());
+      stateTrace.push('DATA_REQUESTED');
+      groupedResults = await Promise.all(poiTypes.map((type) => fetchByType(type)));
+      stateTrace.push('DATA_RECEIVED');
     }
 
-    const rankedPois = rankPoisBetweenPoints(start, end, normalizedPois).slice(0, Math.max(0, maxPoi));
+    const availablePoi = uniquePois(groupedResults.flatMap((group) => group.items));
+    stateTrace.push('POI_AGGREGATED');
+
+    const rankedPois = rankPoisBetweenPoints(start, end, availablePoi).slice(
+      0,
+      Math.max(0, maxPoi)
+    );
+    stateTrace.push('POI_SELECTED');
+
     const routeSegments = createSegments(start, rankedPois, end);
     const route = await routingDao.buildRoute(routeSegments);
 
+    stateTrace.push('ROUTE_BUILT');
+    stateTrace.push('RESPONSE_READY');
+
     return {
+      state: 'RESPONSE_READY',
+      stateTrace,
       request: {
         start,
         end,
@@ -83,7 +100,8 @@ const brainService = {
         maxPoi
       },
       summary: {
-        availablePoiCount: normalizedPois.length,
+        requestedTypeCount: poiTypes.length,
+        availablePoiCount: availablePoi.length,
         selectedPoiCount: rankedPois.length,
         routingProvider: route.provider
       },
@@ -92,31 +110,34 @@ const brainService = {
     };
   },
 
-  /**
-   * Retourne les étapes intermédiaires pour le débogage.
-   */
   async debugPlan(payload) {
     const start = payload.start;
     const end = payload.end;
-    const poiTypes = Array.isArray(payload.poiTypes) ? payload.poiTypes : [];
+    const poiTypes = normalizeRequestedTypes(payload.poiTypes);
+    const maxPoi = Number.isInteger(payload.maxPoi)
+      ? payload.maxPoi
+      : Number(process.env.MAX_DEFAULT_POI || 3);
 
     const fetchedByType = {};
-    const normalizedByType = {};
+    const groupedResults = await Promise.all(poiTypes.map((type) => fetchByType(type)));
 
-    for (const type of poiTypes) {
-      const rawPois = await dataManagerDao.getPoiByType(type);
-      fetchedByType[type] = rawPois.length;
-      normalizedByType[type] = rawPois.map((item) => normalizePoi(type, item)).filter(Boolean);
+    for (const group of groupedResults) {
+      fetchedByType[group.type] = group.items.length;
     }
 
-    const merged = uniqueByCoordinates(Object.values(normalizedByType).flat());
-    const ranked = rankPoisBetweenPoints(start, end, merged).slice(0, payload.maxPoi || 3);
+    const merged = uniquePois(groupedResults.flatMap((group) => group.items));
+    const ranked = rankPoisBetweenPoints(start, end, merged).slice(0, Math.max(0, maxPoi));
 
     return {
-      request: payload,
+      request: {
+        start,
+        end,
+        poiTypes,
+        maxPoi
+      },
       fetchedByType,
-      normalizedPreview: ranked,
-      totalNormalized: merged.length
+      totalAvailable: merged.length,
+      normalizedPreview: ranked
     };
   }
 };

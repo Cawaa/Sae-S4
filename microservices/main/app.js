@@ -12,10 +12,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    service: 'main-brain',
-    status: 'ok'
-  });
+  res.status(200).json({ service: 'main-brain', status: 'ok' });
 });
 
 app.use('/api', brainRoutes);
@@ -29,23 +26,13 @@ app.use((err, req, res, next) => {
   const status = err.status || 500;
   const code = err.code || 'INTERNAL_ERROR';
   const message = err.message || 'Erreur interne du serveur.';
-
-  console.error('[Main][Error]', {
-    status,
-    code,
-    message,
-    path: req.originalUrl,
-    method: req.method
-  });
+  console.error('[Main][Error]', { status, code, message, path: req.originalUrl, method: req.method });
 
   if (res.headersSent) {
     return next(err);
   }
 
-  res.status(status).json({
-    error: message,
-    code
-  });
+  res.status(status).json({ error: message, code });
 });
 
 module.exports = app;

@@ -4,27 +4,20 @@ const DATA_MANAGER_URL = process.env.DATA_MANAGER_URL || 'http://localhost:3002'
 
 const http = axios.create({
   baseURL: DATA_MANAGER_URL,
-  timeout: 4000
+  timeout: 5000,
+  proxy: false
 });
 
 function toServiceError(error) {
-  if (
-    error.code === 'ECONNREFUSED' ||
-    error.code === 'ENOTFOUND' ||
-    error.code === 'ETIMEDOUT'
-  ) {
-    const mapped = new Error(
-      `Le service data-manager est indisponible (${DATA_MANAGER_URL}).`
-    );
+  if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND' || error.code === 'ETIMEDOUT') {
+    const mapped = new Error(`Le service data-manager est indisponible (${DATA_MANAGER_URL}).`);
     mapped.status = 503;
     mapped.code = 'DATA_MANAGER_UNAVAILABLE';
     return mapped;
   }
 
   if (error.response) {
-    const mapped = new Error(
-      `Le data-manager a renvoyé une erreur ${error.response.status}.`
-    );
+    const mapped = new Error(`Le data-manager a renvoyé une erreur ${error.response.status}.`);
     mapped.status = 502;
     mapped.code = 'DATA_MANAGER_BAD_RESPONSE';
     return mapped;
@@ -43,16 +36,10 @@ async function fetchPoi(params = {}) {
 }
 
 const dataManagerDao = {
-  /**
-   * Récupère tous les POI d'un type donné depuis le Data Manager.
-   */
   async getPoiByType(type) {
     return fetchPoi({ type });
   },
 
-  /**
-   * Récupère tous les POI, tous types confondus.
-   */
   async getAllPoi() {
     return fetchPoi();
   }

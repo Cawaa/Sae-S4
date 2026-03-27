@@ -14,9 +14,6 @@ function hasValidCoordinates(point) {
   );
 }
 
-/**
- * Valide le body attendu pour le calcul d'itinéraire.
- */
 function validatePlanRequest(body) {
   const errors = [];
 

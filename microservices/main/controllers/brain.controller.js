@@ -2,19 +2,11 @@ const brainService = require('../services/brain.service');
 const { validatePlanRequest } = require('../validators/plan.validator');
 
 const brainController = {
-  /**
-   * Retourne les types de POI que le microservice sait manipuler.
-   */
-  getAvailableTypes: (req, res) => {
-    res.status(200).json({
-      types: brainService.getAvailableTypes()
-    });
+  getAvailableTypes(req, res) {
+    res.status(200).json({ types: brainService.getAvailableTypes() });
   },
 
-  /**
-   * Route principale de planification d'itinéraire.
-   */
-  planItinerary: async (req, res, next) => {
+  async planItinerary(req, res, next) {
     try {
       const validation = validatePlanRequest(req.body);
 
@@ -32,10 +24,7 @@ const brainController = {
     }
   },
 
-  /**
-   * Variante de debug : utile pour montrer à l'oral ce qui est récupéré et filtré.
-   */
-  debugPlan: async (req, res, next) => {
+  async debugPlan(req, res, next) {
     try {
       const validation = validatePlanRequest(req.body);
 
@@ -46,8 +35,8 @@ const brainController = {
         });
       }
 
-      const debug = await brainService.debugPlan(req.body);
-      res.status(200).json(debug);
+      const result = await brainService.debugPlan(req.body);
+      res.status(200).json(result);
     } catch (error) {
       next(error);
     }
