@@ -22,7 +22,9 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Route introuvable.' });
 });
 
-app.use((err, req, res, next) => {
+// Middleware de gestion des erreurs 
+app.use((err, req, res, next) => { 
+
   const status = err.status || 500;
   const code = err.code || 'INTERNAL_ERROR';
   const message = err.message || 'Erreur interne du serveur.';

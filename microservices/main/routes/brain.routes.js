@@ -14,6 +14,8 @@ const router = express.Router();
  *         description: Liste des types disponibles.
  */
 router.get('/poi/available-types', brainController.getAvailableTypes);
+// Route pour récupérer les types de POI disponibles, 
+// utile pour le client afin de savoir quels types de points d'intérêt peuvent être inclus dans les itinéraires.
 
 /**
  * @swagger
@@ -44,6 +46,9 @@ router.get('/poi/available-types', brainController.getAvailableTypes);
  *         description: Itinéraire calculé.
  */
 router.post('/itinerary/plan', brainController.planItinerary);
+// Route principale pour planifier un itinéraire.
+// Le client envoie un point de départ, un point d'arrivée, 
+// et éventuellement des types de POI à inclure et un nombre maximum de POI.
 
 /**
  * @swagger
@@ -56,5 +61,6 @@ router.post('/itinerary/plan', brainController.planItinerary);
  *         description: Informations de debug.
  */
 router.post('/itinerary/debug', brainController.debugPlan);
+// Route de debug pour retourner les données intermédiaires du brain.
 
 module.exports = router;

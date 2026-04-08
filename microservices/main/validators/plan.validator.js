@@ -2,6 +2,8 @@ function isNumber(value) {
   return typeof value === 'number' && !Number.isNaN(value);
 }
 
+//Pour valider la demande client et bloquer les entrées invalides 
+
 function hasValidCoordinates(point) {
   return Boolean(
     point &&
