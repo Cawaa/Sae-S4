@@ -37,6 +37,10 @@ function validatePlanRequest(body) {
     errors.push('maxPoi doit être un entier positif ou nul.');
   }
 
+  if (body?.compact !== undefined && typeof body.compact !== 'boolean') {
+    errors.push('compact doit être un booléen');
+  }
+
   return {
     valid: errors.length === 0,
     errors
