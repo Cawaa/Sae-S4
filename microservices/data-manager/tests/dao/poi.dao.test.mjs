@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mock } from 'node:test';
 
-import POICacheModel from '../api/model/poiModel.mjs';
-import poiDao from '../api/dao/poiDao.mjs';
+import POICacheModel from '../../api/model/poiModel.mjs';
+import poiDao from '../../api/dao/poiDao.mjs';
 
 test('findByType appelle findOne avec le bon filtre', async () => {
   const leanMock = mock.fn(async () => ({ type: 'toilettes', itemCount: 2 }));
