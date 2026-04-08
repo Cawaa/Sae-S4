@@ -9,18 +9,12 @@ const http = axios.create({
 });
 
 function toFetcherError(error) {
-  if (
-    error.code === 'ECONNREFUSED' ||
-    error.code === 'ENOTFOUND' ||
-    error.code === 'ETIMEDOUT'
-  ) {
+  if (!error.response) {
     const mapped = new Error(`Le fetcher-opendata est indisponible (${FETCHER_URL}).`);
     mapped.status = 503;
     mapped.code = 'FETCHER_UNAVAILABLE';
     return mapped;
-  }
-
-  if (error.response) {
+  } else {
     const mapped = new Error(
       `Le fetcher-opendata a renvoyé une erreur ${error.response.status}.`
     );
@@ -28,8 +22,6 @@ function toFetcherError(error) {
     mapped.code = 'FETCHER_BAD_RESPONSE';
     return mapped;
   }
-
-  return error;
 }
 
 const fetcherDao = {
