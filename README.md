@@ -242,6 +242,8 @@ Le flux normal reste :
 
 
 # 9. Lancer les tests : 
+Tout d'abord mettre à jour la version de node sur les pc de l'IUT : 
+`nvm install --lts` 
 
 Tests pour fetcher open data :
 
