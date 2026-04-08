@@ -5,6 +5,8 @@ const brainRoutes = require('./routes/brain.routes');
 // C'est le service métier principal vu par le client
 const app = express();
 
+app.set('json spaces', 2); // Pour avoir un affichage plus joli avec des sauts de lignes
+
 app.use(express.json({ limit: '10mb' }));// Permet de lire du JSON dans les requêtes
 
 app.get('/', (req, res) => {
