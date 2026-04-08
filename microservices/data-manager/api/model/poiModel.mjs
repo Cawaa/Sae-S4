@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 
+// Schéma Mongoose pour la collection de cache des points d'intérêt (POI)
 const poiCacheSchema = new mongoose.Schema(
   {
     type: { type: String, required: true, unique: true, index: true },
@@ -14,6 +15,7 @@ const poiCacheSchema = new mongoose.Schema(
   }
 );
 
+// Création du modèle Mongoose pour la collection de cache des POI
 const POICacheModel = mongoose.model('POICache', poiCacheSchema);
 
 export default POICacheModel;

@@ -1,5 +1,6 @@
 import cacheService from '../services/cacheService.mjs';
 
+/// Contrôleur principal pour gérer les requêtes liées aux points d'intérêt (POI).
 const poiController = {
   async getPOI(req, res, next) {
     try {

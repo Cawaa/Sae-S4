@@ -2,12 +2,15 @@ import axios from 'axios';
 
 const FETCHER_URL = process.env.FETCHER_URL || 'http://localhost:3001';
 
+// Création d'une instance Axios configurée pour communiquer avec le fetcher-opendata
 const http = axios.create({
   baseURL: FETCHER_URL,
   timeout: 10000,
   proxy: false
 });
 
+
+// Fonction utilitaire pour convertir les erreurs Axios en erreurs plus compréhensibles pour le client
 function toFetcherError(error) {
   if (!error.response) {
     const mapped = new Error(`Le fetcher-opendata est indisponible (${FETCHER_URL}).`);
@@ -24,6 +27,7 @@ function toFetcherError(error) {
   }
 }
 
+// DAO principal pour interagir avec le fetcher-opendata
 const fetcherDao = {
   async fetchDataset(type) {
     try {

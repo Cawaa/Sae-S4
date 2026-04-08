@@ -2,6 +2,7 @@ import poiDao from '../dao/poiDao.mjs';
 import fetcherDao from '../dao/fetcherDao.mjs';
 import { ALLOWED_TYPES, getTtlSeconds } from '../config/cacheConfig.mjs';
 
+// Service principal pour gérer la logique de cache des points d'intérêt (POI)
 function assertKnownType(type) {
   if (!ALLOWED_TYPES.includes(type)) {
     const error = new Error(`Type inconnu : ${type}`);
@@ -11,6 +12,7 @@ function assertKnownType(type) {
   }
 }
 
+// Fonction utilitaire pour vérifier si une entrée de cache est expirée
 function isExpired(cacheEntry) {
   if (!cacheEntry?.expiresAt) {
     return true;
@@ -19,6 +21,7 @@ function isExpired(cacheEntry) {
   return new Date(cacheEntry.expiresAt).getTime() <= Date.now();
 }
 
+// Fonction principale pour rafraîchir les données d'un type de dataset, en forçant une requête au fetcher-opendata et en mettant à jour le cache avec les nouvelles données
 async function refreshType(type, initialState = 'CACHE_MISS') {
   assertKnownType(type);
 
@@ -59,6 +62,7 @@ async function refreshType(type, initialState = 'CACHE_MISS') {
   }
 }
 
+// Fonction principale pour s'assurer que les données d'un type de dataset sont fraîches, en vérifiant le cache et en rafraîchissant si nécessaire
 async function ensureFreshType(type) {
   assertKnownType(type);
 
@@ -85,6 +89,7 @@ async function ensureFreshType(type) {
   };
 }
 
+// Fonction pour inspecter l'état du cache d'un type de dataset donné, en indiquant s'il s'agit d'un cache hit, d'un cache miss ou d'un cache expiré, et en fournissant les métadonnées du cache si disponibles
 async function inspectCache(type) {
   assertKnownType(type);
 
@@ -121,6 +126,7 @@ async function inspectCache(type) {
   };
 }
 
+// Fonction utilitaire pour récupérer tous les points d'intérêt (POI) actuellement stockés dans le cache, en agrégeant les items de tous les types de dataset
 async function getAllCachedPoi() {
   const entries = await poiDao.findAll();
   return entries.flatMap((entry) => entry.items || []);
