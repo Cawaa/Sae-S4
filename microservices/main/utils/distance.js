@@ -3,9 +3,9 @@ function toRadians(value) {//degré en radians
 }
 
 // Calcule la distance en kilomètres entre deux points géographiques en utilisant la formule de Haversine.
-// la formule : distance = 2 * R * arcsin(sqrt(a))
+// la formule : distance = 2 * R * arcsin(sqrt(a)) 
+const EARTH_RADIUS_KM = 6371;
 function haversineDistanceKm(pointA, pointB) {
-  const earthRadiusKm = 6371;
   const latDiff = toRadians(pointB.lat - pointA.lat);
   const lonDiff = toRadians(pointB.lon - pointA.lon);
 
@@ -17,11 +17,10 @@ function haversineDistanceKm(pointA, pointB) {
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-  return earthRadiusKm * c;
+  return EARTH_RADIUS_KM * c;
 }
 
-
-
+// Classe les POIs en fonction de leur proximité au trajet défini par start et end.
 function rankPoisBetweenPoints(start, end, pois) {
   return pois
     .map((poi) => {

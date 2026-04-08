@@ -86,14 +86,15 @@ const brainService = {
     const availablePoi = uniquePois(groupedResults.flatMap((group) => group.items)); //fusion + déduplication des POI disponibles
     stateTrace.push('POI_AGGREGATED');
 
+    //classement par score, puis sélection des meilleurs POI à inclure dans l'itinéraire
     const rankedPois = rankPoisBetweenPoints(start, end, availablePoi).slice(
       0,
       Math.max(0, maxPoi)
-    );//classement par score, puis sélection des meilleurs POI à inclure dans l'itinéraire
+    );
     stateTrace.push('POI_SELECTED');
 
     const routeSegments = createSegments(start, rankedPois, end); //création des segments
-    const route = await routingDao.buildRoute(routeSegments); //construction de la route,
+    const route = await routingDao.buildRoute(routeSegments); //construction de la route
 
     stateTrace.push('ROUTE_BUILT');
     stateTrace.push('RESPONSE_READY');
