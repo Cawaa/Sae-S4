@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --test tests/**/*.test.js tests/**/**/*.test.js",
+     "test": "node --test tests/normalizers/common.test.js tests/normalizers/toilettes.normalizer.test.js tests/normalizers/parkings.normalizer.test.js tests/normalizers/composteurs.normalizer.test.js tests/services/fetchDataset.service.test.js tests/dao/opendata.dao.test.js tests/controllers/opendata.controller.test.js",
+
+  "test:coverage": "node --experimental-test-coverage --test-coverage-exclude=**/usr/** --test-coverage-exclude=**/node_modules/** --test tests/normalizers/common.test.js tests/normalizers/toilettes.normalizer.test.js tests/normalizers/parkings.normalizer.test.js tests/normalizers/composteurs.normalizer.test.js tests/services/fetchDataset.service.test.js tests/dao/opendata.dao.test.js tests/controllers/opendata.controller.test.js",
     "start": "node service.js",
     "dev": "nodemon service.js"
   },
