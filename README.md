@@ -115,6 +115,16 @@ curl -s -X POST http://localhost:3003/api/itinerary/plan \
   }'
 ```
 
+### 4.5 Options de formatage du résultat (`result`)
+
+Vous pouvez ajouter le paramètre optionnel `result` dans le corps de votre requête JSON pour modifier le format de la réponse renvoyée par l'API.
+
+| Valeur | Description |
+| :--- | :--- |
+| `"complete"` | **(Par défaut)** Renvoie l'itinéraire détaillé avec la trace de débogage (`stateTrace`), les métadonnées et tous les segments. |
+| `"compact"` | Renvoie une version optimisée pour le front-end : une liste simple de POI et un tableau de coordonnées continues (sans répétition). |
+| `"geojson"` | Renvoie la réponse au format **standard GeoJSON**. Idéal pour visualiser directement le trajet et les marqueurs sur une carte comme [geojson.io](https://geojson.io). |
+
 ### 4.4 Itinéraire avec composteurs
 
 ```bash

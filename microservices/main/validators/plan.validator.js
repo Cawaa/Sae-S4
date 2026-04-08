@@ -39,8 +39,9 @@ function validatePlanRequest(body) {
     errors.push('maxPoi doit être un entier positif ou nul.');
   }
 
-  if (body?.compact !== undefined && typeof body.compact !== 'boolean') {
-    errors.push('compact doit être un booléen');
+  const validResults = ['complete', 'compact', 'geojson'];
+  if (body?.result !== undefined && !validResults.includes(body.result)) {
+    errors.push('"result" doit être "complete", "compact" ou "geojson".');
   }
 
   return {
