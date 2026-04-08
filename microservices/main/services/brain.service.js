@@ -92,7 +92,14 @@ const brainService = {
     );//classement par score, puis sélection des meilleurs POI à inclure dans l'itinéraire
     stateTrace.push('POI_SELECTED');
 
-    const routeSegments = createSegments(start, rankedPois, end); //création des segments
+    // On prend les POI sélectionnés et on les trie du plus proche au plus loin du point de départ
+    const orderedPois = [...rankedPois].sort((a, b) => {
+      const distA = Math.pow(a.lat - start.lat, 2) + Math.pow(a.lon - start.lon, 2);
+      const distB = Math.pow(b.lat - start.lat, 2) + Math.pow(b.lon - start.lon, 2);
+      return distA - distB; // Ordre croissant
+    });
+
+    const routeSegments = createSegments(start, orderedPois, end); //création des segments
     const route = await routingDao.buildRoute(routeSegments); //construction de la route,
 
     stateTrace.push('ROUTE_BUILT');
@@ -111,10 +118,10 @@ const brainService = {
       summary: {
         requestedTypeCount: poiTypes.length,
         availablePoiCount: availablePoi.length,
-        selectedPoiCount: rankedPois.length,
+        selectedPoiCount: orderedPois.length,
         routingProvider: route.provider
       },
-      selectedPoi: rankedPois,
+      selectedPoi: orderedPois,
       route
     };
   },
