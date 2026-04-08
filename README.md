@@ -97,7 +97,7 @@ curl -s -X POST http://localhost:3003/api/itinerary/plan \
     "end": { "lat": 47.2065, "lon": -1.5632 },
     "poiTypes": ["toilettes"],
     "maxPoi": 2,
-    "compact":true
+    "result":"complete"
   }'
 ```
 
@@ -111,7 +111,21 @@ curl -s -X POST http://localhost:3003/api/itinerary/plan \
     "end": { "lat": 47.2065, "lon": -1.5632 },
     "poiTypes": ["parkings"],
     "maxPoi": 2,
-    "compact":true
+    "result":"complete"
+  }'
+```
+
+### 4.4 Itinéraire avec composteurs
+
+```bash
+curl -s -X POST http://localhost:3003/api/itinerary/plan \
+  -H "Content-Type: application/json" \
+  -d '{
+    "start": { "lat": 47.2184, "lon": -1.5536 },
+    "end": { "lat": 47.2065, "lon": -1.5632 },
+    "poiTypes": ["composteurs"],
+    "maxPoi": 2,
+    "result":"complete"
   }'
 ```
 
@@ -124,20 +138,6 @@ Vous pouvez ajouter le paramètre optionnel `result` dans le corps de votre requ
 | `"complete"` | **(Par défaut)** Renvoie l'itinéraire détaillé avec la trace de débogage (`stateTrace`), les métadonnées et tous les segments. |
 | `"compact"` | Renvoie une version optimisée pour le front-end : une liste simple de POI et un tableau de coordonnées continues (sans répétition). |
 | `"geojson"` | Renvoie la réponse au format **standard GeoJSON**. Idéal pour visualiser directement le trajet et les marqueurs sur une carte comme [geojson.io](https://geojson.io). |
-
-### 4.4 Itinéraire avec composteurs
-
-```bash
-curl -s -X POST http://localhost:3003/api/itinerary/plan \
-  -H "Content-Type: application/json" \
-  -d '{
-    "start": { "lat": 47.2184, "lon": -1.5536 },
-    "end": { "lat": 47.2065, "lon": -1.5632 },
-    "poiTypes": ["composteurs"],
-    "maxPoi": 2,
-    "compact":true
-  }'
-```
 
 ## 5. Format global des POI :
 
