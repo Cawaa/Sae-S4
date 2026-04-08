@@ -96,7 +96,8 @@ curl -s -X POST http://localhost:3003/api/itinerary/plan \
     "start": { "lat": 47.2184, "lon": -1.5536 },
     "end": { "lat": 47.2065, "lon": -1.5632 },
     "poiTypes": ["toilettes"],
-    "maxPoi": 2
+    "maxPoi": 2,
+    "compact":true
   }'
 ```
 
@@ -109,7 +110,8 @@ curl -s -X POST http://localhost:3003/api/itinerary/plan \
     "start": { "lat": 47.2184, "lon": -1.5536 },
     "end": { "lat": 47.2065, "lon": -1.5632 },
     "poiTypes": ["parkings"],
-    "maxPoi": 2
+    "maxPoi": 2,
+    "compact":true
   }'
 ```
 
@@ -122,7 +124,8 @@ curl -s -X POST http://localhost:3003/api/itinerary/plan \
     "start": { "lat": 47.2184, "lon": -1.5536 },
     "end": { "lat": 47.2065, "lon": -1.5632 },
     "poiTypes": ["composteurs"],
-    "maxPoi": 2
+    "maxPoi": 2,
+    "compact":true
   }'
 ```
 

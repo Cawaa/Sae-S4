@@ -2,9 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mock } from 'node:test';
 
-import cacheService from '../api/services/cacheService.mjs';
-import poiDao from '../api/dao/poiDao.mjs';
-import fetcherDao from '../api/dao/fetcherDao.mjs';
+import cacheService from '../../api/services/cacheService.mjs';
+import poiDao from '../../api/dao/poiDao.mjs';
+import fetcherDao from '../../api/dao/fetcherDao.mjs';
 
 function restoreEnv(name, previousValue) {
   if (previousValue === undefined) {
