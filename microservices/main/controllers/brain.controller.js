@@ -25,35 +25,81 @@ const brainController = {
 
       const result = await brainService.buildPlan(req.body);
 
-      // On regarde si compact=true
-      const wantsCompact = req.body.compact === true || req.query.compact === 'true';
+      // On récupère l'option demandée (par défaut 'complete')
+      const resultFormat = req.body.result || req.query.result || 'complete';
 
-      if (wantsCompact) { // Affichage d'un résultat rétréci contenant seulement les coordonnées et noms des POI puis la route complète des points
+      // Affichage d'un résultat au format compact contenant seulement les coordonnées et noms des POI puis la route complète des points
+      if (resultFormat === 'compact') {
         const pointsChain = [];
-        
         if (result.route && result.route.segments.length > 0) {
           pointsChain.push(result.route.segments[0].from);
-          
           result.route.segments.forEach(segment => {
             pointsChain.push(segment.to);
           });
         }
 
-        const compactResponse = {
+        return res.status(200).json({
           poi: result.selectedPoi.map(p => ({
             name: p.name,
             type: p.type,
             lat: p.lat,
             lon: p.lon
           })),
-          // On remplace les segments par notre chaîne de points
           route: pointsChain 
-        };
-        
-        return res.status(200).json(compactResponse);
+        });
       }
 
-      // Si pas de compact ou compact=false, on renvoie la réponse complète par défaut
+      // Affichage d'un format geojson qui permet de copier le résultat sur le site geojson.io pour avoir une vue de l'itinéraire
+      if (resultFormat === 'geojson') {
+        const features = [];
+
+        // Ajout du tracé
+        const routeCoords = [];
+        if (result.route && result.route.segments.length > 0) {
+          const firstPoint = result.route.segments[0].from;
+          // On passe de {lat, lon} à [lon, lat] car l'ordre de geojson est différent
+          routeCoords.push([firstPoint.lon, firstPoint.lat]); 
+          result.route.segments.forEach(segment => {
+            routeCoords.push([segment.to.lon, segment.to.lat]);
+          });
+        }
+
+        if (routeCoords.length > 0) {
+          features.push({
+            type: "Feature",
+            properties: { name: "Itinéraire"},
+            geometry: {
+              type: "LineString",
+              coordinates: routeCoords
+            }
+          });
+        }
+
+        // Ajout des Points
+        if (result.selectedPoi && result.selectedPoi.length > 0) {
+          result.selectedPoi.forEach(p => {
+            features.push({
+              type: "Feature",
+              properties: { 
+                name: p.name, 
+                type: p.type, 
+              },
+              geometry: {
+                type: "Point",
+                // On passe de p.lat, p.lon à [p.lon, p.lat] car l'ordre de geojson est différent
+                coordinates: [p.lon, p.lat]
+              }
+            });
+          });
+        }
+
+        return res.status(200).json({
+          type: "FeatureCollection",
+          features: features
+        });
+      }
+
+      // Si pas de result ou result=complete, on renvoie la réponse complète
       res.status(200).json(result);
     } catch (error) {
       next(error);
