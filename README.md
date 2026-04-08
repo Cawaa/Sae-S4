@@ -251,7 +251,7 @@ Tests pour fetcher open data :
 
 Tests pour main : 
 
-- Depuis la racine du projet : `cd microservices/fetcher-opendata`
+- Depuis la racine du projet : `cd microservices/main`
 - Lancer tous les tests : `npm test`
 - Lancer les tests avec couverture : `node --experimental-test-coverage --test $(find tests -name '*.test.js' | sort)`
 
