@@ -250,6 +250,12 @@ Tests pour fetcher open data :
 - Lancer les tests avec couverture : `npm run test:coverage`
 
 Tests pour main : 
+
 - Depuis la racine du projet : `cd microservices/fetcher-opendata`
 - Lancer tous les tests : `npm test`
 - Lancer les tests avec couverture : `node --experimental-test-coverage --test $(find tests -name '*.test.js' | sort)`
+
+Tests pour data-manager :
+- Depuis la racine du projet : `cd microservices/data-manager`
+- Lancer tous les tests : `npm test`
+- Lancer les tests avec couverture : `npm run test:coverage`
