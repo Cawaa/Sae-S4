@@ -1,3 +1,4 @@
+// Retourne la valeur trouvée à partir d'un chemin pointé (ex: "a.b.c") dans un objet, ou null si le chemin n'existe pas.
 function getByPath(object, path) {
   if (!object || !path) {
     return null;
@@ -17,10 +18,12 @@ function getByPath(object, path) {
   return current ?? null;
 }
 
+// Retourne true si la valeur n'est ni undefined ni null.
 function isDefined(value) {
   return value !== undefined && value !== null;
 }
 
+// Parcourt une liste de sélecteurs et renvoie la première valeur définie et non vide trouvée.
 function pickFirst(record, selectors = []) {
   for (const selector of selectors) {
     let value = null;
@@ -45,6 +48,7 @@ function pickFirst(record, selectors = []) {
   return null;
 }
 
+// Normalise une valeur en chaîne trimée ou renvoie null si indéfinie/vides.
 function asString(value) {
   if (!isDefined(value)) {
     return null;
@@ -54,6 +58,7 @@ function asString(value) {
   return normalized === '' ? null : normalized;
 }
 
+// Convertit en nombre (gère les virgules) et renvoie null si non convertible ou invalide.
 function asNumber(value) {
   if (!isDefined(value) || value === '') {
     return null;
@@ -69,6 +74,7 @@ function asNumber(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+// Supprime les clés dont les valeurs sont null, undefined, chaîne vide ou objet vide.
 function compactObject(object) {
   return Object.fromEntries(
     Object.entries(object).filter(([, value]) => {
@@ -93,14 +99,17 @@ function compactObject(object) {
   );
 }
 
+// Vérifie si un nombre est une latitude plausible entre -90 et 90.
 function isPlausibleLatitude(value) {
   return typeof value === 'number' && Number.isFinite(value) && value >= -90 && value <= 90;
 }
 
+// Vérifie si un nombre est une longitude plausible entre -180 et 180.
 function isPlausibleLongitude(value) {
   return typeof value === 'number' && Number.isFinite(value) && value >= -180 && value <= 180;
 }
 
+// Tente d'extraire des coordonnées depuis un tableau [x, y] ou [lat, lon], retourne {lat, lon} ou null.
 function fromCoordinateArray(value) {
   if (!Array.isArray(value) || value.length < 2) {
     return null;
@@ -124,6 +133,7 @@ function fromCoordinateArray(value) {
   return null;
 }
 
+// Lit un objet contenant des clés de lat/lon variées et renvoie {lat, lon} si valide.
 function readLatLonObject(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return null;
@@ -154,6 +164,7 @@ function readLatLonObject(value) {
   return null;
 }
 
+// Indique si un objet possède au moins une clé évoquant des données géographiques.
 function hasGeoLikeKey(object) {
   if (!object || typeof object !== 'object') {
     return false;
@@ -164,6 +175,7 @@ function hasGeoLikeKey(object) {
   );
 }
 
+// Parcourt récursivement un objet/ tableau pour trouver des coordonnées, en évitant les cycles et en limitant la profondeur.
 function findCoordinatesDeep(value, depth = 0, visited = new Set()) {
   if (!isDefined(value) || depth > 6) {
     return null;
@@ -251,6 +263,7 @@ function findCoordinatesDeep(value, depth = 0, visited = new Set()) {
   return null;
 }
 
+// Lit des coordonnées depuis un enregistrement en essayant des sélecteurs explicites puis des champs génériques.
 function readCoordinates(record, options = {}) {
   const lat = asNumber(pickFirst(record, options.latSelectors || []));
   const lon = asNumber(pickFirst(record, options.lonSelectors || []));
@@ -293,6 +306,7 @@ function readCoordinates(record, options = {}) {
   return null;
 }
 
+// Normalise un enregistrement en POI standardisé {type, sourceDataset, sourceId, name, lat, lon, ...} ou renvoie null si pas de coordonnées.
 function normalizePoi(record, config) {
   const coordinates = readCoordinates(record, config);
 
@@ -337,6 +351,7 @@ function normalizePoi(record, config) {
   });
 }
 
+// Extrait un tableau d'enregistrements depuis différentes formes de payload (array, results, records, data, features).
 function extractRecords(payload) {
   if (Array.isArray(payload)) {
     return payload;
